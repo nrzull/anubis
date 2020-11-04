@@ -2,7 +2,7 @@ defmodule AnubisNATS.Auth.Supervisor do
   def start_link() do
     Gnat.ConsumerSupervisor.start_link(
       %{
-        connection_name: :nats_conn,
+        connection_name: AnubisNATS.Connection.name(),
         module: AnubisNATS.Auth.Controller,
         subscription_topics: [
           %{topic: "auth.*"}
