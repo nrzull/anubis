@@ -9,6 +9,6 @@ defmodule Anubis do
   end
 
   defp children() do
-    [AnubisNATS]
+    [Anubis.Repo, AnubisNATS]
   end
 end
