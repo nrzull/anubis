@@ -6,12 +6,15 @@ defmodule AnubisNATS.AuthControllerTest do
     {:ok, pid: pid}
   end
 
-  test "lmao", %{pid: pid} do
-    assert Process.alive?(pid)
+  describe "auth.login" do
+    test "returns 'true'", %{pid: pid} do
+      assert Process.alive?(pid)
 
-    case Gnat.request(pid, "auth.login", "{}", receive_timeout: 1000) do
-      {:ok, _} -> nil
-      error -> refute error
+      params = %{topic: "auth.login", body: Jason.encode!(%{name: "john", password: "abcd"})}
+
+      {:reply, <<_::binary>> = response} = AnubisNATS.AuthController.request(params)
+
+      assert response == "true"
     end
   end
 end
