@@ -9,3 +9,5 @@ config :anubis, Anubis.Repo,
 config :anubis,
   host: '127.0.0.1',
   port: 4222
+
+config :joken, default_signer: "some_secret"

@@ -26,7 +26,8 @@ defmodule Anubis.MixProject do
       {:ecto, "3.5.4"},
       {:ecto_sql, "3.5.3"},
       {:postgrex, "0.15.7"},
-      {:jason, "1.2.2"}
+      {:jason, "1.2.2"},
+      {:joken, "2.3.0"}
     ]
   end
 end

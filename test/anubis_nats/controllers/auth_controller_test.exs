@@ -13,32 +13,46 @@ defmodule AnubisNATS.AuthControllerTest do
     @auth_login_invalid_2 %{@auth_login_valid | password: nil}
     @auth_login_invalid_3 %{@auth_login_valid | password: nil, name: nil}
 
-    test "@auth_login_valid :: returns ok with payload true", %{pid: pid} do
-      assert Process.alive?(pid)
+    test "@auth_login_valid :: returns ok with token payload" do
       params = %{topic: "auth.login", body: Jason.encode!(@auth_login_valid)}
+
       {:reply, <<_::binary>> = response} = AuthController.request(params)
-      assert Jason.decode!(response) == %{"type" => "ok", "payload" => true}
+
+      %{"type" => "ok", "payload" => payload} = Jason.decode!(response)
+
+      <<_::binary>> = payload
+
+      {:ok, %{}} = Anubis.JWTService.verify_and_validate(payload)
     end
 
-    test "@auth_login_invalid_1 :: returns error with payload false", %{pid: pid} do
-      assert Process.alive?(pid)
+    test "@auth_login_invalid_1 :: returns error with payload message" do
       params = %{topic: "auth.login", body: Jason.encode!(@auth_login_invalid_1)}
+
       {:reply, <<_::binary>> = response} = AuthController.request(params)
-      assert Jason.decode!(response) == %{"type" => "error", "payload" => false}
+
+      %{"type" => "error", "payload" => payload} = Jason.decode!(response)
+
+      <<_::binary>> = payload
     end
 
-    test "@auth_login_invalid_2 :: returns error with payload false", %{pid: pid} do
-      assert Process.alive?(pid)
+    test "@auth_login_invalid_2 :: returns error with payload message" do
       params = %{topic: "auth.login", body: Jason.encode!(@auth_login_invalid_2)}
+
       {:reply, <<_::binary>> = response} = AuthController.request(params)
-      assert Jason.decode!(response) == %{"type" => "error", "payload" => false}
+
+      %{"type" => "error", "payload" => payload} = Jason.decode!(response)
+
+      <<_::binary>> = payload
     end
 
-    test "@auth_login_invalid_3 :: returns error with payload false", %{pid: pid} do
-      assert Process.alive?(pid)
+    test "@auth_login_invalid_3 :: returns error with payload message" do
       params = %{topic: "auth.login", body: Jason.encode!(@auth_login_invalid_3)}
+
       {:reply, <<_::binary>> = response} = AuthController.request(params)
-      assert Jason.decode!(response) == %{"type" => "error", "payload" => false}
+
+      %{"type" => "error", "payload" => payload} = Jason.decode!(response)
+
+      <<_::binary>> = payload
     end
   end
 end

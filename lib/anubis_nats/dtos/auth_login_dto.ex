@@ -2,6 +2,7 @@ defmodule AnubisNATS.AuthLoginDTO do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key false
   @required_fields [:name, :password]
 
   embedded_schema do
