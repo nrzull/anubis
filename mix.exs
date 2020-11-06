@@ -7,7 +7,9 @@ defmodule Anubis.MixProject do
       version: "0.1.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      elixirc_paths: elixirc_paths(Mix.env()),
+      aliases: aliases()
     ]
   end
 
@@ -27,7 +29,17 @@ defmodule Anubis.MixProject do
       {:ecto_sql, "3.5.3"},
       {:postgrex, "0.15.7"},
       {:jason, "1.2.2"},
-      {:joken, "2.3.0"}
+      {:joken, "2.3.0"},
+      {:bcrypt_elixir, "2.2.0"}
     ]
   end
+
+  defp aliases do
+    [
+      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+    ]
+  end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 end

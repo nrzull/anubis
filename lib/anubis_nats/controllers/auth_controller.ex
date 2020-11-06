@@ -8,7 +8,7 @@ defmodule AnubisNATS.AuthController do
 
     try do
       true = changeset.valid?
-      {:ok, token, _} = AuthAction.login(Map.get(changeset, :changes))
+      {:ok, token, _claims} = AuthAction.login(Map.get(changeset, :changes))
       Response.ok(token)
     rescue
       _error ->
