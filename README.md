@@ -2,4 +2,10 @@
 
 ## Internal Auth Microservice
 
-- TODO: add readme for configuration
+### Requirements
+
+- [NATS Server](https://nats.io/) - Messaging System
+
+### TODO
+
+- add readme for configuration
