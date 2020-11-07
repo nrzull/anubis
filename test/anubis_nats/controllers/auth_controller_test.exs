@@ -32,7 +32,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "error", "payload" => payload} = Jason.decode!(response)
 
-      assert is_bitstring(payload)
+      %{"kind" => "invalid_data"} = payload
     end
 
     test "it returns error when password is not given" do
@@ -43,7 +43,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "error", "payload" => payload} = Jason.decode!(response)
 
-      assert is_bitstring(payload)
+      %{"kind" => "invalid_data"} = payload
     end
 
     test "it returns error when name and password are not given" do
@@ -54,7 +54,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "error", "payload" => payload} = Jason.decode!(response)
 
-      assert is_bitstring(payload)
+      %{"kind" => "invalid_data"} = payload
     end
 
     test "it returns error when meta is not given" do
@@ -65,7 +65,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "error", "payload" => payload} = Jason.decode!(response)
 
-      assert is_bitstring(payload)
+      %{"kind" => "invalid_data"} = payload
     end
 
     test "it returns error when account with given name is not exists" do
@@ -76,7 +76,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "error", "payload" => payload} = Jason.decode!(response)
 
-      assert is_bitstring(payload)
+      %{"kind" => "no_account"} = payload
     end
 
     test "it returns error when password doesn't match" do
@@ -89,7 +89,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "error", "payload" => payload} = Jason.decode!(response)
 
-      assert is_bitstring(payload)
+      %{"kind" => "invalid_password"} = payload
     end
   end
 

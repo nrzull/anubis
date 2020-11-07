@@ -13,10 +13,10 @@ defmodule AnubisNATS.AuthController do
       Response.ok(token)
     else
       false ->
-        Response.error(:invalid_data)
+        Response.error(%{kind: :invalid_data})
 
       {:error, reason} when is_atom(reason) ->
-        Response.error(reason)
+        Response.error(%{kind: reason})
     end
   end
 
@@ -30,10 +30,10 @@ defmodule AnubisNATS.AuthController do
       Response.ok(id)
     else
       false ->
-        Response.error(:invalid_data)
+        Response.error(%{kind: :invalid_data})
 
       {:error, reason} when is_atom(reason) ->
-        Response.error(reason)
+        Response.error(%{kind: reason})
     end
   end
 
