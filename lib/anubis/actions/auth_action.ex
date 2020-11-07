@@ -13,7 +13,8 @@ defmodule Anubis.AuthAction do
     with(
       {_, %Account{id: id, password: hashed_password}} <- {:get_account, Repo.one(get_acc_query)},
       {_, true} <- {:is_password_valid, CryptService.valid?(password, hashed_password)},
-      {_, {:ok, token, claims}} <- {:create_token, JWTService.generate_and_sign(%{"id" => id})}
+      token_claims <- Map.put(%{"id" => id}, "meta", meta),
+      {_, {:ok, token, claims}} <- {:create_token, JWTService.generate_and_sign(token_claims)}
     ) do
       Logger.info(Map.merge(meta, %{name: name, action: "AuthAction.login"}))
       {:ok, token, claims}
