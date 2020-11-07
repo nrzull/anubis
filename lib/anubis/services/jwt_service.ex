@@ -12,12 +12,15 @@ defmodule Anubis.JWTService do
   def check_for_corrupted_meta(%{token_meta: token_meta, meta: meta, keys: keys}) do
     target =
       Enum.reduce(keys, %{}, fn key, acc ->
-        Map.put(acc, key, Map.get(token_meta, key))
+        value = Map.get(token_meta, key) || Map.get(token_meta, String.to_atom(key))
+        Map.put(acc, key, value)
       end)
 
     error_keys =
       Enum.reduce(target, [], fn {k, v}, acc ->
-        case Map.get(meta, String.to_atom(k)) == v || Map.get(meta, k) == v do
+        value = Map.get(meta, k) || Map.get(meta, String.to_atom(k))
+
+        case value == v do
           false ->
             [k | acc]
 
