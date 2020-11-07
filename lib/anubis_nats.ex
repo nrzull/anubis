@@ -5,6 +5,18 @@ defmodule AnubisNATS do
     :nats_conn
   end
 
+  def attempt_to_add() do
+    case :gen_tcp.connect(host(), port(), [:binary]) do
+      {:ok, socket} ->
+        :gen_tcp.close(socket)
+        __MODULE__
+
+      {:error, _} ->
+        IO.puts(:stdio, "** [SKIPPING] NATS INTERFACE **")
+        nil
+    end
+  end
+
   def start_link(_) do
     Supervisor.start_link(__MODULE__, [], name: __MODULE__)
   end
@@ -22,12 +34,7 @@ defmodule AnubisNATS do
     {Gnat.ConnectionSupervisor,
      %{
        name: name(),
-       connection_settings: [
-         %{
-           host: Application.fetch_env!(:anubis, :host),
-           port: Application.fetch_env!(:anubis, :port)
-         }
-       ]
+       connection_settings: [%{host: host(), port: port()}]
      }}
   end
 
@@ -37,10 +44,11 @@ defmodule AnubisNATS do
        %{
          connection_name: name(),
          module: AnubisNATS.AuthController,
-         subscription_topics: [
-           %{topic: "auth.*"}
-         ]
+         subscription_topics: [%{topic: "auth.*"}]
        }}
     ]
   end
+
+  defp host(), do: Application.fetch_env!(:anubis, :host)
+  defp port(), do: Application.fetch_env!(:anubis, :port)
 end

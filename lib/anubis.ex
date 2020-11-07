@@ -9,6 +9,6 @@ defmodule Anubis do
   end
 
   defp children() do
-    [Anubis.Repo, AnubisNATS]
+    Enum.filter([Anubis.Repo, AnubisNATS.attempt_to_add()], fn module -> !is_nil(module) end)
   end
 end
