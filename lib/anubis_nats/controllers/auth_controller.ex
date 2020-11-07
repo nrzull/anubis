@@ -6,13 +6,17 @@ defmodule AnubisNATS.AuthController do
   def request(%{topic: "auth.login", body: body}) do
     changeset = AuthLoginDTO.changeset(%AuthLoginDTO{}, body)
 
-    try do
-      true = changeset.valid?
-      {:ok, token, _claims} = AuthAction.login(Map.get(changeset, :changes))
+    with(
+      true <- changeset.valid?,
+      {:ok, token, _claims} <- AuthAction.login(Map.get(changeset, :changes))
+    ) do
       Response.ok(token)
-    rescue
-      _error ->
+    else
+      false ->
         Response.error(:invalid_data)
+
+      {:error, reason} when is_atom(reason) ->
+        Response.error(reason)
     end
   end
 end
