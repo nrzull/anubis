@@ -16,7 +16,7 @@ defmodule Anubis.AuthAction do
       token_claims <- Map.put(%{"id" => id}, "meta", meta),
       {_, {:ok, token, claims}} <- {:create_token, JWTService.generate_and_sign(token_claims)}
     ) do
-      Logger.info(Map.merge(meta, %{name: name, action: "AuthAction.login"}))
+      Logger.info(%{action: "AuthAction.login", name: name, meta: meta})
       {:ok, token, claims}
     else
       {:get_account, nil} ->
@@ -40,7 +40,7 @@ defmodule Anubis.AuthAction do
       changeset <- Changeset.put_change(changeset, :password, CryptService.hash(password)),
       {_, {:ok, account}} <- {:create_account, Repo.insert(changeset)}
     ) do
-      Logger.info(Map.merge(meta, %{name: name, action: "AuthAction.register"}))
+      Logger.info(%{action: "AuthAction.register", name: name, meta: meta})
       {:ok, Map.get(account, :id)}
     else
       {:is_account_exists, true} ->
