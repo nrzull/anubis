@@ -1,14 +1,14 @@
-defmodule AnubisNATS.AuthRegisterDTO do
+defmodule AnubisNATS.AuthVerifyTokenDTO do
   use Ecto.Schema
   import Ecto.Changeset
 
   @primary_key false
-  @required_fields [:name, :password, :meta]
+  @required_fields [:token, :meta, :keys]
 
   embedded_schema do
-    field(:name, :string)
-    field(:password, :string)
+    field(:token, :string)
     field(:meta, :map)
+    field(:keys, {:array, :string})
   end
 
   def changeset(%__MODULE__{} = entity, <<_::binary>> = params) do

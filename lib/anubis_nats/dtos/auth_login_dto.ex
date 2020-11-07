@@ -11,7 +11,6 @@ defmodule AnubisNATS.AuthLoginDTO do
     field(:meta, :map)
   end
 
-  # TODO: add receiver type in meta (ex: receiver: :nats)
   def changeset(%__MODULE__{} = entity, <<_::binary>> = params) do
     entity
     |> cast(Jason.decode!(params), @required_fields)

@@ -1,7 +1,7 @@
 defmodule AnubisNATS.AuthController do
   use Gnat.Server
   alias Anubis.AuthAction
-  alias AnubisNATS.{Response, AuthLoginDTO, AuthRegisterDTO}
+  alias AnubisNATS.{Response, AuthLoginDTO, AuthRegisterDTO, AuthVerifyTokenDTO}
 
   def request(%{topic: "auth.login", body: body}) do
     changeset = AuthLoginDTO.changeset(%AuthLoginDTO{}, body)
@@ -34,6 +34,29 @@ defmodule AnubisNATS.AuthController do
 
       {:error, reason} when is_atom(reason) ->
         Response.error(reason)
+    end
+  end
+
+  def request(%{topic: "auth.verify_token", body: body}) do
+    changeset = AuthVerifyTokenDTO.changeset(%AuthVerifyTokenDTO{}, body)
+
+    with(
+      true <- changeset.valid?,
+      {:ok, _} <- AuthAction.verify_token(Map.get(changeset, :changes))
+    ) do
+      Response.ok()
+    else
+      false ->
+        Response.error(%{kind: :invalid_data})
+
+      {:error, :corrupted_meta, %{} = token_meta, %{} = meta, keys} ->
+        Response.error(%{kind: :corrupted_meta, meta: meta, token_meta: token_meta, keys: keys})
+
+      {:error, :token_expired} ->
+        Response.error(%{kind: :token_expired})
+
+      {:error, reason} when is_atom(reason) ->
+        Response.error(%{kind: reason})
     end
   end
 end
