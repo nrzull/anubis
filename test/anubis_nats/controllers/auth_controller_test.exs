@@ -6,15 +6,9 @@ defmodule AnubisNATS.AuthControllerTest do
 
   describe "auth.login" do
     @auth_login_valid %{name: "john", password: "abcd", meta: %{hwid: "cfGqwdX"}}
-    @auth_login_invalid_1 %{@auth_login_valid | name: nil}
-    @auth_login_invalid_2 %{@auth_login_valid | password: nil}
-    @auth_login_invalid_3 %{@auth_login_valid | password: nil, name: nil}
-    @auth_login_invalid_4 %{@auth_login_valid | meta: nil}
-    @auth_login_invalid_5 %{name: "johna", password: "abcd", meta: %{hwid: "cfGqwdX"}}
-    @auth_login_invalid_6 %{name: "johna", password: "abcdasd", meta: %{hwid: "cfGqwdX"}}
 
-    test "@auth_login_valid :: returns ok with token payload" do
-      Anubis.AuthAction.register(@auth_login_valid)
+    test "it makes log-in successful with @auth_login_valid" do
+      {:ok, _} = Anubis.AuthAction.register(@auth_login_valid)
 
       params = %{topic: "auth.login", body: Jason.encode!(@auth_login_valid)}
 
@@ -27,8 +21,9 @@ defmodule AnubisNATS.AuthControllerTest do
       {:ok, %{}} = Anubis.JWTService.verify_and_validate(payload)
     end
 
-    test "@auth_login_invalid_1 :: returns error with payload message" do
-      params = %{topic: "auth.login", body: Jason.encode!(@auth_login_invalid_1)}
+    test "it returns error when name is not given" do
+      body = %{@auth_login_valid | name: nil}
+      params = %{topic: "auth.login", body: Jason.encode!(body)}
 
       {:reply, <<_::binary>> = response} = AuthController.request(params)
 
@@ -37,8 +32,9 @@ defmodule AnubisNATS.AuthControllerTest do
       <<_::binary>> = payload
     end
 
-    test "@auth_login_invalid_2 :: returns error with payload message" do
-      params = %{topic: "auth.login", body: Jason.encode!(@auth_login_invalid_2)}
+    test "it returns error when password is not given" do
+      body = %{@auth_login_valid | password: nil}
+      params = %{topic: "auth.login", body: Jason.encode!(body)}
 
       {:reply, <<_::binary>> = response} = AuthController.request(params)
 
@@ -47,8 +43,9 @@ defmodule AnubisNATS.AuthControllerTest do
       <<_::binary>> = payload
     end
 
-    test "@auth_login_invalid_3 :: returns error with payload message" do
-      params = %{topic: "auth.login", body: Jason.encode!(@auth_login_invalid_3)}
+    test "it returns error when name and password are not given" do
+      body = %{@auth_login_valid | password: nil, name: nil}
+      params = %{topic: "auth.login", body: Jason.encode!(body)}
 
       {:reply, <<_::binary>> = response} = AuthController.request(params)
 
@@ -57,8 +54,9 @@ defmodule AnubisNATS.AuthControllerTest do
       <<_::binary>> = payload
     end
 
-    test "@auth_login_invalid_4 :: returns error with payload message" do
-      params = %{topic: "auth.login", body: Jason.encode!(@auth_login_invalid_4)}
+    test "it returns error when meta is not given" do
+      body = %{@auth_login_valid | meta: nil}
+      params = %{topic: "auth.login", body: Jason.encode!(body)}
 
       {:reply, <<_::binary>> = response} = AuthController.request(params)
 
@@ -67,8 +65,9 @@ defmodule AnubisNATS.AuthControllerTest do
       <<_::binary>> = payload
     end
 
-    test "@auth_login_invalid_5 :: returns error with payload message" do
-      params = %{topic: "auth.login", body: Jason.encode!(@auth_login_invalid_5)}
+    test "it returns error when account with given name is not exists" do
+      body = %{@auth_login_valid | name: "jane"}
+      params = %{topic: "auth.login", body: Jason.encode!(body)}
 
       {:reply, <<_::binary>> = response} = AuthController.request(params)
 
@@ -77,10 +76,11 @@ defmodule AnubisNATS.AuthControllerTest do
       <<_::binary>> = payload
     end
 
-    test "@auth_login_invalid_6 :: returns error with payload message" do
-      Anubis.AuthAction.register(@auth_login_invalid_5)
+    test "it returns error when password doesn't match" do
+      {:ok, _} = Anubis.AuthAction.register(@auth_login_valid)
 
-      params = %{topic: "auth.login", body: Jason.encode!(@auth_login_invalid_6)}
+      body = %{@auth_login_valid | password: @auth_login_valid[:password] <> "1"}
+      params = %{topic: "auth.login", body: Jason.encode!(body)}
 
       {:reply, <<_::binary>> = response} = AuthController.request(params)
 
