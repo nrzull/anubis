@@ -1,6 +1,6 @@
 defmodule AnubisNATS.AuthController do
   use Gnat.Server
-  alias Anubis.AuthAction
+  alias Anubis.AuthService
   alias AnubisNATS.{Response, AuthLoginDTO, AuthRegisterDTO, AuthVerifyTokenDTO}
 
   def request(%{topic: "auth.login", body: body}) do
@@ -8,7 +8,7 @@ defmodule AnubisNATS.AuthController do
 
     with(
       true <- changeset.valid?,
-      {:ok, token, _claims} <- AuthAction.login(Map.get(changeset, :changes))
+      {:ok, token, _claims} <- AuthService.login(Map.get(changeset, :changes))
     ) do
       Response.ok(token)
     else
@@ -25,7 +25,7 @@ defmodule AnubisNATS.AuthController do
 
     with(
       true <- changeset.valid?,
-      {:ok, <<_::binary>> = id} <- AuthAction.register(Map.get(changeset, :changes))
+      {:ok, <<_::binary>> = id} <- AuthService.register(Map.get(changeset, :changes))
     ) do
       Response.ok(id)
     else
@@ -42,7 +42,7 @@ defmodule AnubisNATS.AuthController do
 
     with(
       true <- changeset.valid?,
-      {:ok, _} <- AuthAction.verify_token(Map.get(changeset, :changes))
+      {:ok, _} <- AuthService.verify_token(Map.get(changeset, :changes))
     ) do
       Response.ok()
     else

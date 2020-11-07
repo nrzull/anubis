@@ -4,13 +4,13 @@ defmodule AnubisNATS.AuthControllerTest do
   import Ecto.Query
   alias AnubisNATS.AuthController
   alias Anubis.Schemas.Account
-  alias Anubis.{JWTService, AuthAction}
+  alias Anubis.{JWTService, AuthService}
 
   describe "auth.login" do
     @auth_login_valid %{name: "john", password: "abcd", meta: %{hwid: "cfGqwdX"}}
 
     test "it makes log-in successful with @auth_login_valid" do
-      {:ok, _} = AuthAction.register(@auth_login_valid)
+      {:ok, _} = AuthService.register(@auth_login_valid)
 
       body = @auth_login_valid
       params = %{topic: "auth.login", body: Jason.encode!(body)}
@@ -80,7 +80,7 @@ defmodule AnubisNATS.AuthControllerTest do
     end
 
     test "it returns error when password doesn't match" do
-      {:ok, _} = AuthAction.register(@auth_login_valid)
+      {:ok, _} = AuthService.register(@auth_login_valid)
 
       body = %{@auth_login_valid | password: @auth_login_valid[:password] <> "1"}
       params = %{topic: "auth.login", body: Jason.encode!(body)}
