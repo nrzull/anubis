@@ -44,8 +44,11 @@ defmodule AnubisNATS.AuthController do
       true <- changeset.valid?,
       {:ok, _} <- AuthService.verify_token(Map.get(changeset, :changes))
     ) do
-      Response.ok()
+      Response.ok(%{})
     else
+      {:ok, token, claims} ->
+        Response.ok(%{kind: :new_token, token: token, claims: claims})
+
       false ->
         Response.error(%{kind: :invalid_data})
 

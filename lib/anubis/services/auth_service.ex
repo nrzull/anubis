@@ -13,7 +13,7 @@ defmodule Anubis.AuthService do
     with(
       {_, %Account{id: id, password: hashed_password}} <- {:get_account, Repo.one(get_acc_query)},
       {_, true} <- {:valid_password?, CryptService.valid?(password, hashed_password)},
-      token_claims <- %{"id" => id, "meta" => meta},
+      token_claims <- JWTService.gen_claims(%{id: id, meta: meta}),
       {_, {:ok, token, claims}} <- {:create_token, JWTService.generate_and_sign(token_claims)}
     ) do
       Logger.info(%{action: "AuthService.login", name: name, meta: meta})
@@ -55,10 +55,14 @@ defmodule Anubis.AuthService do
   end
 
   def verify_token(%{token: token, meta: meta, keys: keys}) do
+    prepare_is_corrupted_payload = fn body, meta, keys ->
+      %{token_meta: Map.get(body, "meta"), meta: meta, keys: keys}
+    end
+
     with(
       {_, {:ok, body}} <- {:valid?, JWTService.verify_and_validate(token)},
-      {_, false} <- {:expired?, JWTService.expired?(body)},
-      is_corrupted_payload <- %{token_meta: Map.get(body, "meta"), meta: meta, keys: keys},
+      {_, false, _} <- {:expired?, JWTService.expired?(body), body},
+      is_corrupted_payload <- prepare_is_corrupted_payload.(body, meta, keys),
       {_, nil} <- {:corrupted?, JWTService.check_for_corrupted_meta(is_corrupted_payload)}
     ) do
       {:ok, nil}
@@ -66,8 +70,16 @@ defmodule Anubis.AuthService do
       {:valid?, {:error, _}} ->
         {:error, :token_invalid}
 
-      {:expired?, true} ->
-        {:error, :token_expired}
+      {:expired?, true, body} ->
+        is_corrupted_payload = prepare_is_corrupted_payload.(body, meta, keys)
+
+        case JWTService.check_for_corrupted_meta(is_corrupted_payload) do
+          nil ->
+            JWTService.refresh_token(is_corrupted_payload)
+
+          _ ->
+            {:error, :token_expired}
+        end
 
       {:corrupted?, {token_meta, meta, keys}} ->
         {:error, :corrupted_meta, token_meta, meta, keys}

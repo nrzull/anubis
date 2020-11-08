@@ -9,6 +9,17 @@ defmodule Anubis.JWTService do
     diff <= 0
   end
 
+  def gen_claims(%{id: id, meta: meta}) do
+    %{"id" => id, "meta" => meta}
+  end
+
+  def refresh_token(%{token_meta: token_meta}) do
+    id = Map.get(token_meta, "id") || Map.get(token_meta, :id)
+    meta = Map.get(token_meta, "meta") || Map.get(token_meta, :meta)
+
+    generate_and_sign(gen_claims(%{id: id, meta: meta}))
+  end
+
   def check_for_corrupted_meta(%{token_meta: token_meta, meta: meta, keys: keys}) do
     target =
       Enum.reduce(keys, %{}, fn key, acc ->

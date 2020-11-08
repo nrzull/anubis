@@ -134,7 +134,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "ok", "payload" => payload} = Jason.decode!(response)
 
-      refute payload
+      assert is_map(payload)
     end
 
     test "it should success with correct meta" do
@@ -146,7 +146,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "ok", "payload" => payload} = Jason.decode!(response)
 
-      refute payload
+      assert is_map(payload)
     end
 
     test "it should success with correct meta and unknown keys" do
@@ -158,7 +158,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "ok", "payload" => payload} = Jason.decode!(response)
 
-      refute payload
+      assert is_map(payload)
     end
 
     test "it should success with incorrect meta and without keys" do
@@ -171,7 +171,7 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "ok", "payload" => payload} = Jason.decode!(response)
 
-      refute payload
+      assert is_map(payload)
     end
 
     test "it should fail with incorrect meta and with keys" do
