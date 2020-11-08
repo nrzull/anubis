@@ -7,10 +7,10 @@ defmodule AnubisNATS.AuthControllerTest do
   alias Anubis.{JWTService, AuthService}
 
   describe "auth.login" do
-    @auth_login_valid %{name: "john", password: "abcdabcd", meta: %{hwid: "cfGqwdX"}}
+    @auth_login_valid %{name: "john", via: "name", password: "abcdabcd", meta: %{hwid: "cfGqwdX"}}
 
     test "it makes log-in successful with @auth_login_valid" do
-      {:ok, _} = AuthService.register(@auth_login_valid)
+      {:ok, _} = AuthService.register(:name, @auth_login_valid)
 
       body = @auth_login_valid
       params = %{topic: "auth.login", body: Jason.encode!(body)}
@@ -86,7 +86,7 @@ defmodule AnubisNATS.AuthControllerTest do
     end
 
     test "it returns error when password doesn't match" do
-      {:ok, _} = AuthService.register(@auth_login_valid)
+      {:ok, _} = AuthService.register(:name, @auth_login_valid)
 
       body = %{@auth_login_valid | password: @auth_login_valid[:password] <> "1"}
       params = %{topic: "auth.login", body: Jason.encode!(body)}
@@ -102,7 +102,12 @@ defmodule AnubisNATS.AuthControllerTest do
   end
 
   describe "auth.register" do
-    @auth_register_valid %{name: "john", password: "abcdabcd", meta: %{hwid: "cfGqwdX"}}
+    @auth_register_valid %{
+      name: "john",
+      via: "name",
+      password: "abcdabcd",
+      meta: %{hwid: "cfGqwdX"}
+    }
 
     test "it creates an account with @auth_register_valid" do
       body = @auth_register_valid

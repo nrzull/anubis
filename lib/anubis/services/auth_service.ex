@@ -7,16 +7,40 @@ defmodule Anubis.AuthService do
   import Ecto.Query
   require Logger
 
-  def login(%{name: name, password: password, meta: meta}) do
-    get_acc_query = from(a in Account, where: a.name == ^name, select: [:id, :password])
+  @available_login_interfaces [:name, :email, :phone]
+  @available_register_interfaces [:name, :email, :phone]
 
+  def is_available_with(:login, interface) when is_bitstring(interface) do
+    interface in Enum.map(@available_login_interfaces, &Atom.to_string(&1))
+  end
+
+  def is_available_with(:register, interface) when is_bitstring(interface) do
+    interface in Enum.map(@available_register_interfaces, &Atom.to_string(&1))
+  end
+
+  def login(:name, %{name: value, password: password, meta: meta}) do
+    q = from(a in Account, where: a.name == ^value, select: [:id, :password])
+    do_login(:name, value, q, %{name: value, password: password, meta: meta})
+  end
+
+  def login(:email, %{email: value, password: password, meta: meta}) do
+    q = from(a in Account, where: a.email == ^value, select: [:id, :password])
+    do_login(:email, value, q, %{email: value, password: password, meta: meta})
+  end
+
+  def login(:phone, %{phone: value, password: password, meta: meta}) do
+    q = from(a in Account, where: a.phone == ^value, select: [:id, :password])
+    do_login(:phone, value, q, %{phone: value, password: password, meta: meta})
+  end
+
+  defp do_login(atom, value, get_acc_query, %{password: password, meta: meta}) do
     with(
       {_, %Account{id: id, password: hashed_password}} <- {:get_account, Repo.one(get_acc_query)},
       {_, true} <- {:valid_password?, CryptService.valid?(password, hashed_password)},
       token_claims <- JWTService.gen_claims(%{id: id, meta: meta}),
       {_, {:ok, token, claims}} <- {:create_token, JWTService.generate_and_sign(token_claims)}
     ) do
-      Logger.info(%{action: "AuthService.login", name: name, meta: meta})
+      Logger.info([{:action, "AuthService.login"}, {atom, value}, {:meta, meta}])
       {:ok, token, claims}
     else
       {:get_account, nil} ->
@@ -30,17 +54,30 @@ defmodule Anubis.AuthService do
     end
   end
 
-  def register(%{name: name, password: password, meta: meta}) do
-    exists_query = from(a in Account, where: a.name == ^name)
+  def register(:name, %{name: value, password: password, meta: meta}) do
+    q = from(a in Account, where: a.name == ^value)
+    do_register(:name, value, q, %{name: value, password: password, meta: meta})
+  end
 
+  def register(:email, %{email: value, password: password, meta: meta}) do
+    q = from(a in Account, where: a.email == ^value)
+    do_register(:email, value, q, %{email: value, password: password, meta: meta})
+  end
+
+  def register(:phone, %{phone: value, password: password, meta: meta}) do
+    q = from(a in Account, where: a.phone == ^value)
+    do_register(:phone, value, q, %{phone: value, password: password, meta: meta})
+  end
+
+  defp do_register(atom, value, exists_query, %{password: password, meta: meta} = params) do
     with(
       {_, false} <- {:account_exists?, Repo.exists?(exists_query)},
-      changeset <- Account.changeset_register(%Account{}, %{name: name, password: password}),
+      changeset <- Account.changeset_register(%Account{}, params),
       {_, true} <- {:valid?, changeset.valid?},
       changeset <- Changeset.put_change(changeset, :password, CryptService.hash(password)),
       {_, {:ok, account}} <- {:create_account, Repo.insert(changeset)}
     ) do
-      Logger.info(%{action: "AuthService.register", name: name, meta: meta})
+      Logger.info([{:action, "AuthService.register"}, {atom, value}, {:meta, meta}])
       {:ok, Map.get(account, :id)}
     else
       {:account_exists?, true} ->

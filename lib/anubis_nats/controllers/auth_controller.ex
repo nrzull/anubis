@@ -8,7 +8,8 @@ defmodule AnubisNATS.AuthController do
 
     with(
       true <- changeset.valid?,
-      {:ok, token, claims} <- AuthService.login(Map.get(changeset, :changes))
+      via <- String.to_atom(Ecto.Changeset.get_change(changeset, :via)),
+      {:ok, token, claims} <- AuthService.login(via, Map.get(changeset, :changes))
     ) do
       Response.ok(%{kind: :new_token, token: token, claims: claims})
     else
@@ -25,7 +26,8 @@ defmodule AnubisNATS.AuthController do
 
     with(
       true <- changeset.valid?,
-      {:ok, <<_::binary>> = id} <- AuthService.register(Map.get(changeset, :changes))
+      via <- String.to_atom(Ecto.Changeset.get_change(changeset, :via)),
+      {:ok, <<_::binary>> = id} <- AuthService.register(via, Map.get(changeset, :changes))
     ) do
       Response.ok(%{account_id: id})
     else
