@@ -7,7 +7,7 @@ defmodule AnubisNATS.AuthControllerTest do
   alias Anubis.{JWTService, AuthService}
 
   describe "auth.login" do
-    @auth_login_valid %{name: "john", password: "abcd", meta: %{hwid: "cfGqwdX"}}
+    @auth_login_valid %{name: "john", password: "abcdabcd", meta: %{hwid: "cfGqwdX"}}
 
     test "it makes log-in successful with @auth_login_valid" do
       {:ok, _} = AuthService.register(@auth_login_valid)
@@ -102,7 +102,7 @@ defmodule AnubisNATS.AuthControllerTest do
   end
 
   describe "auth.register" do
-    @auth_register_valid %{name: "john", password: "abcd", meta: %{hwid: "cfGqwdX"}}
+    @auth_register_valid %{name: "john", password: "abcdabcd", meta: %{hwid: "cfGqwdX"}}
 
     test "it creates an account with @auth_register_valid" do
       body = @auth_register_valid
