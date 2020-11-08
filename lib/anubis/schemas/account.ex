@@ -32,7 +32,7 @@ defmodule Anubis.Schemas.Account do
 
   def validate_for(changeset, :name) do
     changeset
-    |> validate_length(:name, min: 2, max: 32)
+    |> validate_length(:name, min: 2, max: 64)
   end
 
   def validate_for(changeset, :password) do
@@ -43,6 +43,11 @@ defmodule Anubis.Schemas.Account do
   def validate_for(changeset, :email) do
     changeset
     |> validate_length(:email, min: 4, max: 128)
+  end
+
+  def validate_for(changeset, :phone) do
+    changeset
+    |> validate_length(:phone, min: 4, max: 32)
   end
 
   def validate_for(changeset, _) do
