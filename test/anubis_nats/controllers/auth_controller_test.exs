@@ -19,9 +19,13 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "ok", "payload" => payload} = Jason.decode!(response)
 
-      assert is_bitstring(payload)
+      %{"kind" => "new_token", "token" => token, "claims" => claims} = payload
 
-      {:ok, %{}} = Anubis.JWTService.verify_and_validate(payload)
+      assert is_map(claims)
+
+      assert is_bitstring(token)
+
+      {:ok, %{}} = Anubis.JWTService.verify_and_validate(token)
     end
 
     test "it returns error when name is not given" do
@@ -76,6 +80,8 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "error", "payload" => payload} = Jason.decode!(response)
 
+      assert is_map(payload)
+
       %{"kind" => "no_account"} = payload
     end
 
@@ -88,6 +94,8 @@ defmodule AnubisNATS.AuthControllerTest do
       {:reply, <<_::binary>> = response} = AuthController.request(params)
 
       %{"type" => "error", "payload" => payload} = Jason.decode!(response)
+
+      assert is_map(payload)
 
       %{"kind" => "invalid_password"} = payload
     end
@@ -104,9 +112,13 @@ defmodule AnubisNATS.AuthControllerTest do
 
       %{"type" => "ok", "payload" => payload} = Jason.decode!(response)
 
-      assert is_bitstring(payload)
+      assert is_map(payload)
 
-      assert Anubis.Repo.exists?(from(a in Account, where: a.id == ^payload))
+      %{"account_id" => id} = payload
+
+      assert is_bitstring(id)
+
+      assert Anubis.Repo.exists?(from(a in Account, where: a.id == ^id))
     end
   end
 
@@ -171,6 +183,8 @@ defmodule AnubisNATS.AuthControllerTest do
       {:reply, <<_::binary>> = response} = AuthController.request(params)
 
       %{"type" => "error", "payload" => payload} = Jason.decode!(response)
+
+      assert is_map(payload)
 
       %{"kind" => "corrupted_meta", "keys" => ["hwid"]} = payload
     end
