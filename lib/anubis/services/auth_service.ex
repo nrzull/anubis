@@ -57,34 +57,41 @@ defmodule Anubis.AuthService do
   end
 
   def verify_token(%{token: token, meta: meta, keys: keys}) do
-    prepare_is_corrupted_payload = fn body, meta, keys ->
-      %{token_meta: Map.get(body, "meta"), meta: meta, keys: keys}
-    end
+    case JWTService.verify_and_validate(token) do
+      {:error, reason} ->
+        {:error, reason}
 
+      {:ok, claims} ->
+        do_verify_token(%{
+          claims: claims,
+          token_meta: Map.get(claims, "meta"),
+          meta: meta,
+          keys: keys
+        })
+    end
+  end
+
+  defp do_verify_token(%{claims: claims, token_meta: token_meta, meta: meta, keys: _} = params) do
     with(
-      {_, {:ok, body}} <- {:valid?, JWTService.verify_and_validate(token)},
-      {_, false, _} <- {:expired?, JWTService.expired?(body), body},
-      is_corrupted_payload <- prepare_is_corrupted_payload.(body, meta, keys),
-      {_, nil} <- {:corrupted?, JWTService.check_for_corrupted_meta(is_corrupted_payload)}
+      {_, false} <- {:expired?, JWTService.expired?(claims)},
+      {_, nil} <- {:corrupted?, JWTService.check_for_corrupted_meta(params)}
     ) do
       {:ok, nil}
     else
       {:valid?, {:error, _}} ->
         {:error, :token_invalid}
 
-      {:expired?, true, body} ->
-        is_corrupted_payload = prepare_is_corrupted_payload.(body, meta, keys)
-
-        case JWTService.check_for_corrupted_meta(is_corrupted_payload) do
+      {:expired?, true} ->
+        case JWTService.check_for_corrupted_meta(params) do
           nil ->
-            JWTService.refresh_token(is_corrupted_payload)
+            JWTService.refresh_token(params)
 
           _ ->
             {:error, :token_expired}
         end
 
-      {:corrupted?, {token_meta, meta, keys}} ->
-        {:error, :corrupted_meta, token_meta, meta, keys}
+      {:corrupted?, {:error, error_keys}} ->
+        {:error, :corrupted_meta, token_meta, meta, error_keys}
 
       {:error, :token_malformed} ->
         {:error, :token_invalid}

@@ -42,7 +42,7 @@ defmodule Anubis.JWTService do
 
     case List.first(error_keys) do
       nil -> nil
-      _ -> {token_meta, meta, error_keys}
+      _ -> {:error, error_keys}
     end
   end
 end
