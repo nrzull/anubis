@@ -1,6 +1,6 @@
 defmodule AnubisNATS.AuthController do
   use Gnat.Server
-  alias Anubis.AuthService
+  alias Anubis.{AuthService, ChangesetService}
   alias AnubisNATS.{Response, AuthLoginDTO, AuthRegisterDTO, AuthVerifyTokenDTO}
 
   def request(%{topic: "auth.login", body: body}) do
@@ -14,10 +14,13 @@ defmodule AnubisNATS.AuthController do
       Response.ok(%{kind: :new_token, token: token, claims: claims})
     else
       false ->
-        Response.error(%{kind: :invalid_data})
+        Response.error(%{kind: :invalid_data, errors: ChangesetService.build_error_map(changeset)})
 
       {:error, reason} when is_atom(reason) ->
         Response.error(%{kind: reason})
+
+      {:error, reason, errors} when is_atom(reason) ->
+        Response.error(%{kind: reason, errors: errors})
     end
   end
 
@@ -32,10 +35,13 @@ defmodule AnubisNATS.AuthController do
       Response.ok(%{account_id: id})
     else
       false ->
-        Response.error(%{kind: :invalid_data})
+        Response.error(%{kind: :invalid_data, errors: ChangesetService.build_error_map(changeset)})
 
       {:error, reason} when is_atom(reason) ->
         Response.error(%{kind: reason})
+
+      {:error, reason, errors} when is_atom(reason) ->
+        Response.error(%{kind: reason, errors: errors})
     end
   end
 
@@ -52,7 +58,7 @@ defmodule AnubisNATS.AuthController do
         Response.ok(%{kind: :new_token, token: token, claims: claims})
 
       false ->
-        Response.error(%{kind: :invalid_data})
+        Response.error(%{kind: :invalid_data, errors: ChangesetService.build_error_map(changeset)})
 
       {:error, :corrupted_meta, %{} = token_meta, %{} = meta, keys} ->
         Response.error(%{kind: :corrupted_meta, meta: meta, token_meta: token_meta, keys: keys})
@@ -62,6 +68,9 @@ defmodule AnubisNATS.AuthController do
 
       {:error, reason} when is_atom(reason) ->
         Response.error(%{kind: reason})
+
+      {:error, reason, errors} when is_atom(reason) ->
+        Response.error(%{kind: reason, errors: errors})
     end
   end
 end

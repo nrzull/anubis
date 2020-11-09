@@ -1,7 +1,7 @@
 defmodule Anubis.AuthService do
   alias Anubis.Repo
   alias Anubis.Schemas.Account
-  alias Anubis.{CryptService, JWTService}
+  alias Anubis.{CryptService, JWTService, ChangesetService}
   alias Ecto.Changeset
 
   import Ecto.Query
@@ -119,7 +119,7 @@ defmodule Anubis.AuthService do
     with(
       {_, false} <- {:account_exists?, Repo.exists?(exists_query)},
       changeset <- Account.changeset_register(%Account{}, params),
-      {_, true} <- {:valid?, changeset.valid?},
+      {_, true, _} <- {:valid?, changeset.valid?, changeset},
       changeset <- Changeset.put_change(changeset, :password, CryptService.hash(password)),
       {_, {:ok, account}} <- {:create_account, Repo.insert(changeset)}
     ) do
@@ -129,11 +129,11 @@ defmodule Anubis.AuthService do
       {:account_exists?, true} ->
         {:error, :account_already_exists}
 
-      {:valid?, false} ->
-        {:error, :not_valid}
+      {:valid?, false, changeset} ->
+        {:error, :not_valid, ChangesetService.build_error_map(changeset)}
 
-      {:create_account, {:error, _changeset}} ->
-        {:error, :cant_create_account}
+      {:create_account, {:error, changeset}} ->
+        {:error, :cant_create_account, ChangesetService.build_error_map(changeset)}
     end
   end
 
