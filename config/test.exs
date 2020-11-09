@@ -1,12 +1,13 @@
 import Config
 
+config :logger, level: :warn
+
 config :anubis, Anubis.Repo,
   database: "anubis_test",
   username: "postgres",
   password: "postgres",
-  hostname: "localhost"
-
-config :anubis, Anubis.Repo, pool: Ecto.Adapters.SQL.Sandbox
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
 
 config :anubis,
   host: '127.0.0.1',

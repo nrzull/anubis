@@ -1,10 +1,8 @@
 defmodule AnubisNATS.AuthController.AuthLoginTest do
   use Anubis.RepoCase
   use ExUnit.Case
-  import Ecto.Query
   alias AnubisNATS.AuthController
-  alias Anubis.Schemas.Account
-  alias Anubis.{JWTService, AuthService}
+  alias Anubis.{AuthService}
 
   @valid_via_name %{name: "john", via: "name", password: "abcdabcd", meta: %{hwid: "cfGqwdX"}}
 

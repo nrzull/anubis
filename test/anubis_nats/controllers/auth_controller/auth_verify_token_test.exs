@@ -1,10 +1,8 @@
 defmodule AnubisNATS.AuthController.AuthVerifyTokenTest do
   use Anubis.RepoCase
   use ExUnit.Case
-  import Ecto.Query
   alias AnubisNATS.AuthController
-  alias Anubis.Schemas.Account
-  alias Anubis.{JWTService, AuthService}
+  alias Anubis.{JWTService}
 
   describe "auth.verify_token" do
     @valid_meta %{hwid: "cfGqwdX"}

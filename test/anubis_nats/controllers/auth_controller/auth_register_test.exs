@@ -4,7 +4,6 @@ defmodule AnubisNATS.AuthController.AuthRegisterTest do
   import Ecto.Query
   alias AnubisNATS.AuthController
   alias Anubis.Schemas.Account
-  alias Anubis.{JWTService, AuthService}
 
   describe "auth.register via name" do
     @valid_via_name %{
