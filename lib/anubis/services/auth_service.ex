@@ -62,12 +62,8 @@ defmodule Anubis.AuthService do
         {:error, reason}
 
       {:ok, claims} ->
-        do_verify_token(%{
-          claims: claims,
-          token_meta: Map.get(claims, "meta"),
-          meta: meta,
-          keys: keys
-        })
+        token_meta = Map.get(claims, "meta")
+        do_verify_token(%{claims: claims, token_meta: token_meta, meta: meta, keys: keys})
     end
   end
 
