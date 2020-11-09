@@ -118,7 +118,7 @@ defmodule Anubis.AuthService do
   defp do_register(atom, value, exists_query, %{password: password, meta: meta} = params) do
     with(
       {_, false} <- {:account_exists?, Repo.exists?(exists_query)},
-      changeset <- Account.changeset_register(%Account{}, params),
+      changeset <- Account.changeset_register(%Account{}, params, [atom]),
       {_, true, _} <- {:valid?, changeset.valid?, changeset},
       changeset <- Changeset.put_change(changeset, :password, CryptService.hash(password)),
       {_, {:ok, account}} <- {:create_account, Repo.insert(changeset)}
