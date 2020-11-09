@@ -33,6 +33,10 @@ defmodule Anubis.AuthService do
     do_login(:phone, value, q, prepare_payload_for(:login, :phone, params))
   end
 
+  def login(_, _) do
+    {:error, :unknown_login_interface}
+  end
+
   def register(:name, %{name: value, password: _, meta: _} = params) do
     q = from(a in Account, where: a.name == ^value)
     do_register(:name, value, q, prepare_payload_for(:register, :name, params))
@@ -46,6 +50,10 @@ defmodule Anubis.AuthService do
   def register(:phone, %{phone: value, password: _, meta: _} = params) do
     q = from(a in Account, where: a.phone == ^value)
     do_register(:phone, value, q, prepare_payload_for(:register, :phone, params))
+  end
+
+  def register(_, _) do
+    {:error, :unknown_register_interface}
   end
 
   def verify_token(%{token: token, meta: meta, keys: keys}) do
