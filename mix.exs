@@ -30,7 +30,8 @@ defmodule Anubis.MixProject do
       {:postgrex, "0.15.7"},
       {:jason, "1.2.2"},
       {:joken, "2.3.0"},
-      {:bcrypt_elixir, "2.2.0"}
+      {:bcrypt_elixir, "2.2.0"},
+      {:httpoison, "1.7.0"}
     ]
   end
 
